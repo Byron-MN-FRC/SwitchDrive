@@ -7,7 +7,8 @@ A selector will be on the smartdashboard on the driver station that allows you t
 
 Each controller is set to port 0, so each time you switch controllers you need to switch the load order
 
-<==================================================================================================================================>
+<===================================================>
+
 Types of drive:
 
   Joystick- Drive with the big logitech joystick
