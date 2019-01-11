@@ -3,15 +3,9 @@ package org.usfirst.frc.team4859.robot.subsystems;
 import org.usfirst.frc.team4859.robot.RobotMap;
 import org.usfirst.frc.team4859.robot.ThrottleLookup.ThrottleLookup;
 import org.usfirst.frc.team4859.robot.commands.DriveWithJoystick;
-
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -19,8 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  */
 public class DriveTrain extends Subsystem {
-	// Put methods for controlling this subsystem
-    // here. Call these from Commands.
+
 	public static Spark motorChassisFrontLeft = new Spark(RobotMap.talonIDChassisFrontLeft);
 	public static Spark motorChassisFrontRight = new Spark(RobotMap.talonIDChassisFrontRight);
 	
@@ -29,6 +22,7 @@ public class DriveTrain extends Subsystem {
 
 	public static MecanumDrive chassisDrive = new MecanumDrive(motorChassisFrontLeft, motorChassisBackLeft, motorChassisFrontRight, motorChassisBackRight);
 	
+	//Creates the final variables for storing and applying the power values
 	private double drivePower;
 	private double driveTurn;
 	private double driveSide;
@@ -37,6 +31,9 @@ public class DriveTrain extends Subsystem {
 	}
 
 	public void driveWithJoystick(Joystick joystick) {
+		
+		//Creates variables for the different power value inputs for all drive modes because a switch statement isn't nice
+		//and you need to create them outside the switch if you are going to use them again or it's funky
 		double joystickPower;
 		double joystickForward;
 		double joystickTwist;
@@ -44,23 +41,30 @@ public class DriveTrain extends Subsystem {
 		double turnStick;
 		double sideDrive;
 		int povStick;
+		
+		//this changes which axis' on the controller it looks for to get the different power values based on the smartdashboard
 		switch (RobotMap.driveMode) {
 			case "Joystick":
+				//Gets the joystick values
 				joystickForward=-joystick.getY();
 				turnStick=joystick.getTwist();
 				sideDrive=joystick.getX();
 				
+				//Attatches the joystick values to power values and scales them based on the arrays in throttlelookup
+				//Throttlelookup makes the joysticks less touchy 
 				driveSide = (RobotMap.pmode) ? ThrottleLookup.calcJoystickCorrection("SlowY", sideDrive):ThrottleLookup.calcJoystickCorrection("NormY", sideDrive);
 				drivePower = (RobotMap.pmode) ? ThrottleLookup.calcJoystickCorrection("SlowY", joystickForward):ThrottleLookup.calcJoystickCorrection("NormY", joystickForward);
 				driveTurn = (RobotMap.pmode) ? ThrottleLookup.calcJoystickCorrection("SlowT", turnStick):ThrottleLookup.calcJoystickCorrection("NormT", turnStick);
 				break;
 			
 			case "DDR pad":
+				//Gets the POV value from the joystick (-1 to 7) because thats how the ddr pad inputs the 4 main buttons
 				povStick=joystick.getPOV();
 				
-				//limits value of drivepower to positive to prevent wonkiness when driving
+				//limits value of drivepower to positive to prevent wonkiness when driving with ddr pad
 				RobotMap.variableBounds(RobotMap.drivePower, 1, 0);
 				
+				//changes the drive powers applied to correctly drive the robot in the vector indicated by the ddr pad
 				switch(povStick) {
 					default:
 						drivePower=0;
@@ -103,6 +107,7 @@ public class DriveTrain extends Subsystem {
 						driveSide=-RobotMap.drivePower;
 						break;
 				}
+				//controlls direction of the turn, based on the same power as everything else
 				driveTurn=RobotMap.driveTwist*RobotMap.drivePower;
 				break;
 		
@@ -111,7 +116,7 @@ public class DriveTrain extends Subsystem {
 				joystickForward = joystick.getRawAxis(4);
 				joystickReverse = joystick.getRawAxis(1);
 		
-				//combines joystick power vectors
+				//combines joystick power vectors (back/forward)
 				joystickPower=joystickForward-joystickReverse;
 				
 				//changes twist to negative if going backwards
@@ -127,7 +132,7 @@ public class DriveTrain extends Subsystem {
 				joystickForward = joystick.getRawAxis(4);
 				joystickReverse = joystick.getRawAxis(1);
 		
-				//combines joystick power vectors
+				//combines joystick power vectors (left/right)
 				joystickPower=joystickForward-joystickReverse;
 				
 				driveTurn=(RobotMap.pmode)?ThrottleLookup.calcJoystickCorrection("SlowT", joystickPower):ThrottleLookup.calcJoystickCorrection("NormT", joystickPower);
@@ -145,6 +150,7 @@ public class DriveTrain extends Subsystem {
 				driveTurn=(RobotMap.pmode)?ThrottleLookup.calcJoystickCorrection("SlowT", turnStick):ThrottleLookup.calcJoystickCorrection("NormT", turnStick);;
 				break;
 			default:
+				//the same as the joystick code, so if invalid input to the switch statement it will run the default joystick code
 				joystickForward=-joystick.getY();
 				turnStick=joystick.getTwist();
 				sideDrive=joystick.getX();
@@ -154,7 +160,7 @@ public class DriveTrain extends Subsystem {
 				driveTurn = (RobotMap.pmode) ? ThrottleLookup.calcJoystickCorrection("SlowT", turnStick):ThrottleLookup.calcJoystickCorrection("NormT", turnStick);
 			break;
 		}
-		//limits values to values between 1 and -1
+		//limits values to values between 1 and -1 to prevent potential errors
 		drivePower=RobotMap.variableBounds(drivePower, 1, -1);
 		driveTurn=RobotMap.variableBounds(driveTurn, 1, -1);
 		driveSide=RobotMap.variableBounds(driveSide, 1, -1);

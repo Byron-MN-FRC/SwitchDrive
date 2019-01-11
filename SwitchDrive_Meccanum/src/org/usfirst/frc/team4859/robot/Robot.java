@@ -33,6 +33,7 @@ public class Robot extends TimedRobot {
 	public static UsbCamera cameraBackward = CameraServer.getInstance().startAutomaticCapture("Backward", 1);
 	public static UsbCamera cameraForward = CameraServer.getInstance().startAutomaticCapture("Forward", 0);
 	
+	//creates the chooser put on smartdashboard looking for the variable type String
 	SendableChooser<String> driveSelect = new SendableChooser<String>();
 	
 	@Override
@@ -52,6 +53,8 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putData(Scheduler.getInstance());
 		
 		//Adds all drive modes to the smartdashboard from the array in robotmap so I don't have to manually add them each time
+		//it adds the name that appears onto the smartdashboard for each option, then adds that again as a string and attatches
+		//it to the option on the dashboard because the name is the string it looks for to switch drive modes
 		for(int i = 1; i<RobotMap.possibleDrive.length-1; i++) {
 			driveSelect.addObject(RobotMap.possibleDrive[i], RobotMap.possibleDrive[i]);
 		}
@@ -106,10 +109,11 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		
+		//gets the drive mode selected on the smartdashboard and then puts which one is selected out for troubleshooting
 		RobotMap.driveMode = driveSelect.getSelected();
 		SmartDashboard.putString("DrMode", RobotMap.driveMode);
 		
-		//Sets starting power of motors for DDR pad mode to 0.5 for an easy way to start
+		//Sets starting power of motors for DDR pad mode to 0.5 so they dont have to spam to get to a reasonable speed
 		if(RobotMap.driveMode=="DDR pad") {
 			RobotMap.drivePower=0.5;
 		}
@@ -121,6 +125,8 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
+		
+		//re-gets the drive mode, then pushes if it is in precision (slow) mode and what drive mode is selected
 		RobotMap.driveMode = driveSelect.getSelected();
 		SmartDashboard.putBoolean("Pmode?", RobotMap.pmode);
 		SmartDashboard.putString("DrMode", RobotMap.driveMode);

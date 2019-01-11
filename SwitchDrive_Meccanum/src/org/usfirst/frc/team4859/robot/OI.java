@@ -29,7 +29,7 @@ public class OI {
 	//declares joystick(s)
 	private final Joystick joystick = new Joystick(0);
 	
-	//declares button(s)
+	//declares potential button(s)
 	Button one = new JoystickButton(joystick,1);
 	Button two = new JoystickButton(joystick, 2);
 	Button three = new JoystickButton(joystick, 3);
@@ -48,6 +48,12 @@ public class OI {
 	
 	public OI () {
 		
+		//switches which buttons do what for each controller
+		//Pmode turns on precision mode
+		//Pmode2 turns off precision mode
+		//WheelSideways allows the robot to drive sideways when using the racing wheel
+		//Ddr turn assigns either a negative or positive one to control which direction the robot is turning
+		//Ddr drive increases or decreases the power applied to the motors when using the ddr pad
 		switch (RobotMap.driveMode) {	
 			case "Joystick":
 				SmartDashboard.putString("Mode", "Joystick");
